@@ -51,21 +51,16 @@ CREATE TABLE teachers (
 );
 
 
-CREATE TABLE assignments (
+-- Create classes BEFORE sections
+CREATE TABLE classes (
     id SERIAL PRIMARY KEY,
-    teacher_id INTEGER NOT NULL,
-    subject_id INTEGER NOT NULL,
-    class_id INTEGER NOT NULL,
-    title VARCHAR(200) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
-    assigned_date DATE NOT NULL,
-    due_date DATE NOT NULL,
-    attachment_url TEXT,
-    status VARCHAR(30) DEFAULT 'ACTIVE',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE sections (
     id SERIAL PRIMARY KEY,
@@ -83,11 +78,45 @@ CREATE TABLE sections (
     CONSTRAINT unique_section_per_class
         UNIQUE (class_id, name)
 );
-CREATE TABLE classes (
+CREATE TABLE subjects (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE assignments (
+    id SERIAL PRIMARY KEY,
+
+    teacher_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    class_id INTEGER NOT NULL,
+
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    assigned_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    attachment_url TEXT,
+    status VARCHAR(30) DEFAULT 'ACTIVE',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_assignment_teacher
+        FOREIGN KEY (teacher_id)
+        REFERENCES teachers(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_assignment_subject
+        FOREIGN KEY (subject_id)
+        REFERENCES subjects(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_assignment_class
+        FOREIGN KEY (class_id)
+        REFERENCES classes(id)
+        ON DELETE CASCADE
 );

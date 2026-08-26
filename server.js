@@ -6,9 +6,17 @@ import userRoute from "./src/routes/userRoute.js";
 import assignmentRoute from "./src/routes/assignmentRoute.js";
 import classRoute from "./src/routes/classRoute.js";
 import { connectDB } from "./src/config/database.js";
+import cors from "cors";
 
 const app = express();
 connectDB();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 
