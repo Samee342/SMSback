@@ -20,10 +20,10 @@ router.get("/", getStudentsController);
 router.get("/:id", getStudentByIdController);
 
 // Create student
-router.post("/", auth, roleBasedAuth(admin), createStudentController);
+router.post("/", auth, createStudentController);
 
 // Update student
-router.patch("/:id", auth, roleBasedAuth(admin), updateStudentController);
+router.patch("/:id", auth, updateStudentController);
 
 // Delete student
 router.delete("/:id", auth, deleteStudentController);

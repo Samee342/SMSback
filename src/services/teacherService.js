@@ -1,25 +1,75 @@
 import { pool } from "../config/database.js";
+import bcrypt from "bcrypt";
 
 const createTeacher = async (data) => {
-  const { userId, qualification, department, joiningDate, address, gender } =
-    data;
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    photoUrl,
+    qualification,
+    department,
+    joiningDate,
+    address,
+    gender,
+  } = data;
 
-  const result = await pool.query(
-    `INSERT INTO teachers
-    (
-      user_id,
-      qualification,
-      department,
-      joining_date,
-      address,
-      gender
-    )
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING *`,
-    [userId, qualification, department, joiningDate, address, gender],
-  );
+  const client = await pool.connect();
 
-  return result.rows[0];
+  try {
+    await client.query("BEGIN");
+
+    // 1. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 2. Create user
+    const userResult = await client.query(
+      `INSERT INTO users
+      (
+        first_name,
+        last_name,
+        email,
+        password,
+        phone,
+        photo_url,
+        role
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id`,
+      [firstName, lastName, email, hashedPassword, phone, photoUrl, "TEACHER"],
+    );
+
+    const userId = userResult.rows[0].id;
+
+    // 3. Create teacher using generated userId
+    const teacherResult = await client.query(
+      `INSERT INTO teachers
+      (
+        user_id,
+        qualification,
+        department,
+        joining_date,
+        address,
+        gender
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`,
+      [userId, qualification, department, joiningDate, address, gender],
+    );
+
+    // 4. Everything succeeded
+    await client.query("COMMIT");
+
+    return teacherResult.rows[0];
+  } catch (error) {
+    // 5. Something failed
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 const getTeachers = async () => {

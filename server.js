@@ -5,6 +5,7 @@ import authRoute from "./src/routes/authRoute.js";
 import userRoute from "./src/routes/userRoute.js";
 import assignmentRoute from "./src/routes/assignmentRoute.js";
 import classRoute from "./src/routes/classRoute.js";
+import subjectRoute from "./src/routes/subjectRoute.js";
 import { connectDB } from "./src/config/database.js";
 import cors from "cors";
 
@@ -26,6 +27,7 @@ app.use("/api/teacher", teacherRoute);
 app.use("/api/user", userRoute);
 app.use("/api/class", classRoute);
 app.use("/api/assignment", assignmentRoute);
+app.use("/api/subjects", subjectRoute);
 
 app.get("/", (req, res) => {
   res.json({

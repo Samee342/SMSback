@@ -4,7 +4,9 @@ import {
   deleteSection,
   getAllClasses,
   getAllSections,
+  getClassesWithSections,
   getClassById,
+  createSection,
   updateClass,
   updateSection,
 } from "../services/classService.js";
@@ -111,6 +113,23 @@ const deleteSectionController = async (req, res) => {
     console.log(error);
   }
 };
+const getClassesWithSectionsController = async (req, res) => {
+  try {
+    const data = await getClassesWithSections();
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch classes with sections",
+    });
+  }
+};
 export {
   createClassController,
   getAllClassesController,
@@ -121,4 +140,5 @@ export {
   getAllSectionsControllers,
   updateSectionController,
   deleteSectionController,
+  getClassesWithSectionsController,
 };

@@ -323,6 +323,65 @@ const deleteSection = async (id) => {
     message: "Section deleted successfully",
   };
 };
+// Get All Classes With Sections And Students
+const getClassesWithSections = async () => {
+  const result = await pool.query(`
+    SELECT
+      c.id,
+      c.name,
+      c.description,
+      c.created_at,
+      c.updated_at,
+
+      COALESCE(
+        json_agg(
+          DISTINCT jsonb_build_object(
+            'id', s.id,
+            'name', s.name,
+            'students',
+            COALESCE(
+              (
+                SELECT json_agg(
+                  json_build_object(
+                    'id', st.id,
+                    'userId', u.id,
+                    'firstName', u.first_name,
+                    'lastName', u.last_name,
+                    'email', u.email,
+                    'phone', u.phone,
+                    'photoUrl', u.photo_url
+                  )
+                  ORDER BY u.first_name ASC
+                )
+                FROM students st
+                JOIN users u
+                  ON st.user_id = u.id
+                WHERE st.section_id = s.id
+              ),
+              '[]'
+            )
+          )
+        ) FILTER (WHERE s.id IS NOT NULL),
+        '[]'
+      ) AS sections
+
+    FROM classes c
+
+    LEFT JOIN sections s
+      ON c.id = s.class_id
+
+    GROUP BY
+      c.id,
+      c.name,
+      c.description,
+      c.created_at,
+      c.updated_at
+
+    ORDER BY c.id ASC
+  `);
+
+  return result.rows;
+};
 
 export {
   createClass,
@@ -336,4 +395,5 @@ export {
   getSectionById,
   updateSection,
   deleteSection,
+  getClassesWithSections,
 };
